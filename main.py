@@ -10,6 +10,31 @@ from PIL import Image
 import pandas as pd
 import datetime
 import time
+
+import cv2
+from cv2 import aruco
+
+########################################################################""""
+def detect_aruco_markers(frame):
+    # Convert frame to grayscale
+    gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+
+    # Define ArUco dictionary
+    aruco_dict = aruco.getPredefinedDictionary(aruco.DICT_6X6_250)
+
+    # Instantiate detector parameters
+    parameters = aruco.DetectorParameters()
+
+    # Detect markers
+    corners, ids, _ = aruco.detectMarkers(gray, aruco_dict, parameters=parameters)
+
+    # Draw detected markers on frame
+    if ids is not None:
+        aruco.drawDetectedMarkers(frame, corners, ids)
+
+    return frame, ids
+##########################################################################################
+############################################################################################
 ############################################# FUNCTIONS ################################################
 
 def assure_path_exists(path):
@@ -278,6 +303,10 @@ def TrackImages():
         window.destroy()
     while True:
         ret, im = cam.read()
+###########################################################################
+        # Detect ArUco markers
+        im, aruco_ids = detect_aruco_markers(im)
+
         gray = cv2.cvtColor(im, cv2.COLOR_BGR2GRAY)
         faces = faceCascade.detectMultiScale(gray, 1.2, 5)
         for (x, y, w, h) in faces:
